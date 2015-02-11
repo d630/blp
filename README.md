@@ -67,16 +67,16 @@ Further, we need some infos from the `terminfo`(5) database, which need to be se
         X_TI_BLUE_F_BOLD=${X_TI_BOLD}${X_TI_BLUE_F} \
         X_TI_CYAN_F=$(tput setaf 6) \
         X_TI_CYAN_F_BOLD=${X_TI_BOLD}${X_TI_CYAN_F} \
-        X_TI_GREEN_B=$(command tput setab 2) \
+        X_TI_GREEN_B=$(tput setab 2) \
         X_TI_GREEN_F=$(tput setaf 2 || tput AF 2) \
         X_TI_GREEN_F_BOLD=${X_TI_BOLD}${X_TI_GREEN_F} \
         X_TI_PURPLE_F=$(tput setaf 5) \
         X_TI_PURPLE_F_BOLD=${X_TI_BOLD}${X_TI_PURPLE_F} \
-        X_TI_RED_B=$(command tput setab 1) \
+        X_TI_RED_B=$(tput setab 1) \
         X_TI_RED_F=$(tput setaf 1) \
         X_TI_RED_F_BOLD=${X_TI_BOLD}${X_TI_RED_F} \
-        X_TI_WHITE_B=$(command tput setab 7) \
-        X_TI_YELLOW_B=$(command tput setab 3) \
+        X_TI_WHITE_B=$(tput setab 7) \
+        X_TI_YELLOW_B=$(tput setab 3) \
         X_TI_YELLOW_F=$(tput setaf 3) \
         X_TI_YELLOW_F_BOLD=${X_TI_BOLD}${X_TI_YELLOW_F}
 } 2>/dev/null
@@ -90,6 +90,7 @@ The script will set up an alias for the function `__blp_prompt()`. Use it this w
     % prompt on
     % prompt off
     % prompt tag ARG1 ...
+    % prompt tag
 ```
 
 ### Bugs & Requests
