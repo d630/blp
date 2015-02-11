@@ -54,8 +54,7 @@ Further, we need some infos from the `terminfo`(5) database, which need to be se
         X_TI_HIDE=$(tput civis || tput vi) \
         X_TI_HOME=$(tput home) \
         X_TI_RESET=$(tput sgr0 || tput me) \
-        X_TI_SHOW=$(tput cnorm || tput ve)
-
+        X_TI_SHOW=$(tput cnorm || tput ve) \
         X_TI_WHITE_F=$(tput setaf 7 || tput AF 7) \
         X_TI_WHITE_F_BOLD=${X_TI_BOLD}${X_TI_WHITE_F}
 } 2>/dev/null
@@ -85,7 +84,7 @@ Further, we need some infos from the `terminfo`(5) database, which need to be se
 
 ### Help
 
-The script will set up and alias for the function `__blp_prompt`. Use it this way in an interactive instance:
+The script will set up an alias for the function `__blp_prompt`. Use it this way in an interactive instance:
 
 ```
     % prompt on
@@ -95,7 +94,7 @@ The script will set up and alias for the function `__blp_prompt`. Use it this wa
 
 ### Bugs & Requests
 
-Report it on https://github.com/D630/blp/issues.
+Report it on https://github.com/D630/blp/issues
 
 ### Credits
 
