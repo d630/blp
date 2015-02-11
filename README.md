@@ -84,7 +84,7 @@ Further, we need some infos from the `terminfo`(5) database, which need to be se
 
 ### Help
 
-The script will set up an alias for the function `__blp_prompt`. Use it this way in an interactive instance:
+The script will set up an alias for the function `__blp_prompt()`. Use it this way in an interactive instance:
 
 ```
     % prompt on
