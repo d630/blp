@@ -50,7 +50,7 @@ __blp_main ()
     else
         hst=\\[${X_TI_YELLOW_F}\\]${hst}@\\[${X_TI_RESET}\\]
     fi
-    declare color_host_hash=\\[${X_TI_WHITE_F}\\]
+    declare color_host_hash=
     #declare host_cksum= color_host_hash=
     #read -r host_cksum _ < <(cksum <<<"$HOSTNAME")
     #declare color_host_hash=\\[$(tput setaf $((3 + host_cksum % 6 )))\\]
@@ -76,7 +76,7 @@ __blp_main ()
     then
         perm=\\[${X_TI_GREEN_F}\\]:\\[${X_TI_RESET}\\]
     else
-        perm=\\[${X_TI_RED_F}\\]:\\[${X_TI_RESET}\\]
+        perm=\\[${X_TI_RED_F_BOLD}\\]:\\[${X_TI_RESET}\\]
     fi
 
     ## Build $bracket_{close,open}
@@ -86,7 +86,18 @@ __blp_main ()
     ## Build $shlvl
     declare shlvl=${SHLVL}l
 
-    declare -g PS1="${X_BLP_PS1_PREFIX:+${bracket_open}${X_BLP_PS1_PREFIX}${bracket_close}}${bracket_open}$-${bracket_close}${bracket_open}${shlvl}${jbs}${bracket_close}${bracket_open}${user}${hst}${perm}\\w${bracket_close}${err_string:+ ${err_string}} % "
+    ## Build $git_ps1
+    declare -F __git_ps1 >/dev/null && {
+        declare git_ps1=$(GIT_PS1_SHOWDIRTYSTATE=yes ; GIT_PS1_SHOWSTASHSTATE=yes ; GIT_PS1_SHOWUPSTREAM=auto ; GIT_PIBE_STYLE=branch ; GIT_PS1_SHOWCOLORHINTS= __git_ps1 "%s")
+        if [[ $git_ps1 == *\** ]]
+        then
+            git_ps1=\(\\[${X_TI_RED_F}\\]${git_ps1}\\[${X_TI_RESET}\\]\)
+        else
+            git_ps1=${git_ps1:+\(${git_ps1}\)}
+        fi
+    }
+
+    declare -g PS1="${X_BLP_PS1_PREFIX:+${bracket_open}${X_BLP_PS1_PREFIX}${bracket_close}}${bracket_open}$-${bracket_close}${bracket_open}${shlvl}${jbs}${bracket_close}${bracket_open}${user}${hst}${perm}\\w${bracket_close}${err_string:+ ${err_string}}${git_ps1:+ ${git_ps1}} % "
     declare -g PS2="> "
 }
 
