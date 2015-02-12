@@ -1,11 +1,12 @@
-## blp v0.1.0.0 [AGPLv3]
+## blp v0.1.1.0 [AGPLv3]
 
 `blp`(1) is my minimal [liquidprompt](https://github.com/nojhan/liquidprompt) (Linux only, `GNU bash`(1) >= 3.2).
 
 It takes account into:
 - current option flags as specified upon invocation
+- git-prompt via `__git_ps1()`
 - hostname
-- incremented integer indicating started bash instances
+- started bash/shell instances
 - last error code
 - permission
 - pwd
@@ -14,6 +15,8 @@ It takes account into:
 - user-defined general-purpose prefix tag
 
 ### Install
+
+md5sum 8abe738341f3474c31efde773b3f736c blp.bash
 
 Get the script with `$ git clone https://github.com/D630/blp.git` and feed `bash`(1) with something like that:
 
@@ -39,22 +42,13 @@ shopt -q promptvars && {
 
 ```
 
-Further, we need some infos from the `terminfo`(5) database, which need to be set before executing `__blp_man`:
+Further, we need some infos from the `terminfo`(5) database, which need to be set before executing `__blp_man`():
 
 ```sh
 {
     declare -x \
-        X_TI_ALT=$(tput smcup || tput ti)\
-        X_TI_AM_OFF=$(tput rmam) \
-        X_TI_AM_ON=$(tput am) \
         X_TI_BOLD=$(tput bold || tput md) \
-        X_TI_CLEAR=$(tput clear) \
-        X_TI_EALT=$(tput rmcup || tput te) \
-        X_TI_EEL=$(tput el || tput ce) \
-        X_TI_HIDE=$(tput civis || tput vi) \
-        X_TI_HOME=$(tput home) \
         X_TI_RESET=$(tput sgr0 || tput me) \
-        X_TI_SHOW=$(tput cnorm || tput ve) \
         X_TI_WHITE_F=$(tput setaf 7 || tput AF 7) \
         X_TI_WHITE_F_BOLD=${X_TI_BOLD}${X_TI_WHITE_F}
 } 2>/dev/null
