@@ -12,6 +12,11 @@ __blp_main ()
     declare err_string=
     (($1 == 0 )) || err_string="\\[${X_TI_PURPLE_F}\\]${err}\\[${X_TI_RESET}\\]"
 
+    ## Build $bracket_{close,open}
+    declare \
+        bracket_open=[ \
+        bracket_close=]
+
     ## Build $jbs
     declare jbs=
     declare -i detached=$(screen -ls 2>/dev/null | grep -c '[Dd]etach[^)]*)$')
@@ -72,16 +77,13 @@ __blp_main ()
     fi
 
     ## Build $perm
+    declare perm=
     if [[ -w $PWD ]]
     then
         perm=\\[${X_TI_GREEN_F}\\]:\\[${X_TI_RESET}\\]
     else
         perm=\\[${X_TI_RED_F_BOLD}\\]:\\[${X_TI_RESET}\\]
     fi
-
-    ## Build $bracket_{close,open}
-    declare bracket_open=[
-    declare bracket_close=]
 
     ## Build $shlvl
     declare shlvl=${SHLVL}l
@@ -95,6 +97,12 @@ __blp_main ()
         else
             git_ps1=${git_ps1:+\(${git_ps1}\)}
         fi
+        if [[ -d ${PWD}/.git ]]
+        then
+            git_ps1=${git_ps1:+± ${git_ps1}}
+        else
+            git_ps1=${git_ps1:+±± ${git_ps1}}
+        fi
     }
 
     declare -g PS1="${X_BLP_PS1_PREFIX:+${bracket_open}${X_BLP_PS1_PREFIX}${bracket_close}}${bracket_open}$-${bracket_close}${bracket_open}${shlvl}${jbs}${bracket_close}${bracket_open}${user}${hst}${perm}\\w${bracket_close}${err_string:+ ${err_string}}${git_ps1:+ ${git_ps1}} % "
@@ -102,27 +110,25 @@ __blp_main ()
 }
 
 __blp_prompt ()
-{
-    case ${1//[0-9]/} in
-        off)
-            declare -g X_BLP_PS1_OLD=$PS1
-            PS1="% "
-            ;;
-        tag)
-            if [[ $2 ]]
-            then
-                declare -g X_BLP_PS1_PREFIX=${@:2}
-            else
-                unset -v X_BLP_PS1_PREFIX
-            fi
-            ;;
-        on)
-            unset -v X_BLP_PS1_OLD
-            ;&
-        "")
-            [[ $X_BLP_PS1_OLD ]] || __blp_main "$1"
-    esac
-}
+case ${1//[0-9]/} in
+    off)
+        declare -g X_BLP_PS1_OLD=$PS1
+        PS1="% "
+        ;;
+    tag)
+        if [[ $2 ]]
+        then
+            declare -g X_BLP_PS1_PREFIX=${@:2}
+        else
+            unset -v X_BLP_PS1_PREFIX
+        fi
+        ;;
+    on)
+        unset -v X_BLP_PS1_OLD
+        ;&
+    "")
+        [[ $X_BLP_PS1_OLD ]] || __blp_main "$1"
+esac
 
 alias prompt=__blp_prompt
 
