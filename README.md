@@ -1,4 +1,4 @@
-## blp v0.1.1.0 [AGPLv3]
+## blp v0.1.1.1 [AGPLv3]
 
 `blp`(1) is my minimal [liquidprompt](https://github.com/nojhan/liquidprompt) (Linux only, `GNU bash`(1) >= 3.2).
 
@@ -16,7 +16,9 @@ It takes account into:
 
 ### Install
 
-md5sum 8abe738341f3474c31efde773b3f736c blp.bash
+```
+md5sum8321162e523731afeec5a52f6651da80  blp.bash
+```
 
 Get the script with `$ git clone https://github.com/D630/blp.git` and feed `bash`(1) with something like that:
 
