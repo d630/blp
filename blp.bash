@@ -101,7 +101,7 @@ __blp_main ()
         then
             git_ps1=${git_ps1:+± ${git_ps1}}
         else
-            git_ps1=${git_ps1:+±± ${git_ps1}}
+            git_ps1=${git_ps1:+(±) ${git_ps1}}
         fi
     }
 
