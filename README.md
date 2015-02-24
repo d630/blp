@@ -1,4 +1,4 @@
-## blp v0.1.1.1 [AGPLv3]
+## blp v0.1.2.0 [AGPLv3]
 
 `blp`(1) is my minimal [liquidprompt](https://github.com/nojhan/liquidprompt) (Linux only, `GNU bash`(1) >= 3.2).
 
@@ -17,10 +17,12 @@ It takes account into:
 ### Install
 
 ```
-md5sum8321162e523731afeec5a52f6651da80  blp.bash
+% git clone https://github.com/D630/blp.git
+% md5sum blp.bash
+9ee64a4345a63461bd2b025b83570a37  blp.bash
 ```
 
-Get the script with `$ git clone https://github.com/D630/blp.git` and feed `bash`(1) with something like that:
+Feed `bash`(1) with something like that:
 
 ```sh
 shopt -s promptvars
@@ -85,6 +87,7 @@ The script will set up an alias for the function `__blp_prompt()`. Use it this w
 ```
     % prompt on
     % prompt off
+    % prompt toggle
     % prompt tag ARG1 ...
     % prompt tag
 ```

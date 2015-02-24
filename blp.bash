@@ -125,7 +125,16 @@ case ${1//[0-9]/} in
         ;;
     on)
         unset -v X_BLP_PS1_OLD
-        ;&
+        __blp_main "$1"
+        ;;
+    toggle)
+        if [[ $X_BLP_PS1_OLD ]]
+        then
+            __blp_prompt on
+        else
+            __blp_prompt off
+        fi
+        ;;
     "")
         [[ $X_BLP_PS1_OLD ]] || __blp_main "$1"
 esac
