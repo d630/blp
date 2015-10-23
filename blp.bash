@@ -6,12 +6,34 @@
 # Most code has been stolen from liquidprompt [AGPLv3]
 # https://github.com/nojhan/liquidprompt
 
+__blp_color ()
+{
+        {
+                builtin typeset +i -gx \
+                        BLP_TI_BOLD="$(command tput bold || command tput md)" \
+                        BLP_TI_RESET="$(command tput sgr0 || command tput me)";
+        } 2>/dev/null
+
+        [[ $TERM == *-m ]] || {
+                builtin typeset +i -gx \
+                        BLP_TI_BLACK_F="$(command tput setaf 0)" \
+                        BLP_TI_GREEN_F="$(command tput setaf 2 || command tput AF 2)" \
+                        BLP_TI_PURPLE_F="$(command tput setaf 5)" \
+                        BLP_TI_RED_B="$(command tput setab 1)" \
+                        BLP_TI_RED_F="$(command tput setaf 1)" \
+                        BLP_TI_RED_F_BOLD="${BLP_TI_BOLD}${BLP_TI_RED_F}"\
+                        BLP_TI_YELLOW_B="$(command tput setab 3)" \
+                        BLP_TI_YELLOW_F="$(command tput setaf 3)" \
+                        BLP_TI_YELLOW_F_BOLD="${BLP_TI_BOLD}${BLP_TI_YELLOW_F}";
+        } 2>/dev/null
+}
+
 __blp_main ()
 {
         ## Work with $1 which is $? of the last command
         builtin typeset err_string
         (( $1 )) && {
-                err_string="\\[${TI_PURPLE_F}\\]${err}\\[${TI_RESET}\\]"
+                err_string="\\[${BLP_TI_PURPLE_F}\\]${err}\\[${BLP_TI_RESET}\\]"
         }
 
         ## Build $bracket_{close,open}
@@ -39,7 +61,7 @@ __blp_main ()
         }
 
         (( detached )) && {
-                jbs=\\[${TI_YELLOW_F}\\]${detached}d\\[${TI_RESET}\\]
+                jbs=\\[${BLP_TI_YELLOW_F}\\]${detached}d\\[${BLP_TI_RESET}\\]
         }
 
         ### running
@@ -49,7 +71,7 @@ __blp_main ()
         )
 
         (( ${#running[@]} )) && {
-                jbs=${jbs:+${jbs}/}\\[${TI_YELLOW_F_BOLD}\\]${#running[@]}\&\\[${TI_RESET}\\]
+                jbs=${jbs:+${jbs}/}\\[${BLP_TI_YELLOW_F_BOLD}\\]${#running[@]}\&\\[${BLP_TI_RESET}\\]
         }
 
         ### stopped
@@ -59,7 +81,7 @@ __blp_main ()
         )
 
         (( ${#stopped[@]} )) && {
-                jbs=${jbs:+${jbs}/}\\[${TI_YELLOW_F_BOLD}\\]${#stopped[@]}z\\[${TI_RESET}\\]
+                jbs=${jbs:+${jbs}/}\\[${BLP_TI_YELLOW_F_BOLD}\\]${#stopped[@]}z\\[${BLP_TI_RESET}\\]
         }
 
         ## Build $user
@@ -67,14 +89,14 @@ __blp_main ()
         if
                 (( ! EUID ))
         then
-                user=\\[${TI_YELLOW_F_BOLD}\\]\\u\\[${TI_RESET}\\]
+                user=\\[${BLP_TI_YELLOW_F_BOLD}\\]\\u\\[${BLP_TI_RESET}\\]
         else
                 if
                         [[ $USER == $LOGNAME ]]
                 then
                         user=\\u
                 else
-                        user=\\[${TI_BOLD}\\]\\u\\[${TI_RESET}\\]
+                        user=\\[${BLP_TI_BOLD}\\]\\u\\[${BLP_TI_RESET}\\]
                 fi
         fi
 
@@ -94,9 +116,9 @@ __blp_main ()
         if
                 [[ -n $DISPLAY ]]
         then
-                hst=\\[${TI_GREEN_F}\\]${hst}@\\[${TI_RESET}\\]
+                hst=\\[${BLP_TI_GREEN_F}\\]${hst}@\\[${BLP_TI_RESET}\\]
         else
-                hst=\\[${TI_YELLOW_F}\\]${hst}@\\[${TI_RESET}\\]
+                hst=\\[${BLP_TI_YELLOW_F}\\]${hst}@\\[${BLP_TI_RESET}\\]
         fi
 
         ### session
@@ -111,7 +133,7 @@ __blp_main ()
                         -z $SSH_TTY
                 ]]
         then
-                hst=${hst}${color_host_hash}\\h\\[${TI_RESET}\\]
+                hst=${hst}${color_host_hash}\\h\\[${BLP_TI_RESET}\\]
         else
                 builtin typeset sess_src="$(
                         command who am i \
@@ -123,13 +145,13 @@ __blp_main ()
                 if
                         [[ -z ${sess_src/:*/} ]]
                 then
-                        hst=${hst}${color_host_hash}\\h\\[${TI_RESET}\\]
+                        hst=${hst}${color_host_hash}\\h\\[${BLP_TI_RESET}\\]
                 elif
                         [[ $sess_parent =~ ^su(do|)$ ]]
                 then
-                        hst=${hst}\\[${TI_YELLOW_B}}\\]\\h\\[${TI_RESET}\\]
+                        hst=${hst}\\[${BLP_TI_YELLOW_B}}\\]\\h\\[${BLP_TI_RESET}\\]
                 else
-                        hst=${hst}\\[${TI_BLACK_F}${TI_RED_B}\\]\\h\\[${TI_RESET}\\]
+                        hst=${hst}\\[${BLP_TI_BLACK_F}${BLP_TI_RED_B}\\]\\h\\[${BLP_TI_RESET}\\]
                 fi
         fi
 
@@ -138,9 +160,9 @@ __blp_main ()
         if
                 [[ -w $PWD ]]
         then
-                perm=\\[${TI_GREEN_F}\\]:\\[${TI_RESET}\\]
+                perm=\\[${BLP_TI_GREEN_F}\\]:\\[${BLP_TI_RESET}\\]
         else
-                perm=\\[${TI_RED_F_BOLD}\\]:\\[${TI_RESET}\\]
+                perm=\\[${BLP_TI_RED_F_BOLD}\\]:\\[${BLP_TI_RESET}\\]
         fi
 
         ## Build $shlvl
@@ -162,7 +184,7 @@ __blp_main ()
                 if
                         [[ $git_ps1 == *\** ]]
                 then
-                        git_ps1=\(\\[${TI_RED_F}\\]${git_ps1}\\[${TI_RESET}\\]\)
+                        git_ps1=\(\\[${BLP_TI_RED_F}\\]${git_ps1}\\[${BLP_TI_RESET}\\]\)
                 else
                         git_ps1=${git_ps1:+\(${git_ps1}\)}
                 fi
@@ -205,6 +227,13 @@ tag)
 ;;
 on)
         builtin unset -v BLP_PS1_OLD
+        if
+                (( BLP_USE_COLOR ))
+        then
+                __blp_color
+        else
+                builtin unset -v ${!BLP_TI_*}
+        fi
         __blp_main "$1"
 ;;
 toggle)
