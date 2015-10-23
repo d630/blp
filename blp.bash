@@ -142,3 +142,5 @@ esac
 alias prompt=__blp_prompt
 
 __blp_prompt "$@"
+
+# vim: set ts=8 sw=8 tw=0 et :
