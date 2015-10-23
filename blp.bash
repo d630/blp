@@ -8,135 +8,183 @@
 
 __blp_main ()
 {
-    ## Work with $1 which is $? of the last command
-    declare err_string=
-    (($1 == 0 )) || err_string="\\[${X_TI_PURPLE_F}\\]${err}\\[${X_TI_RESET}\\]"
+         ## Work with $1 which is $? of the last command
+        builtin typeset err_string
+        (( $1 )) && {
+                err_string="\\[${X_TI_PURPLE_F}\\]${err}\\[${X_TI_RESET}\\]"
+        }
 
-    ## Build $bracket_{close,open}
-    declare \
-        bracket_open=[ \
-        bracket_close=]
+        ## Build $bracket_{close,open}
+        builtin typeset \
+                bracket_open=[ \
+                bracket_close=];
 
-    ## Build $jbs
-    declare jbs=
-    declare -i detached=$(screen -ls 2>/dev/null | grep -c '[Dd]etach[^)]*)$')
-    detached+=$(tmux list-sessions 2>/dev/null | grep -cv 'attached')
-    ((detached > 0)) && jbs=\\[${X_TI_YELLOW_F}\\]${detached}d\\[${X_TI_RESET}\\]
-    declare -i running=$(jobs -r | wc -l)
-    ((running == 0 )) || jbs=${jbs:+${jbs}/}\\[${X_TI_YELLOW_F_BOLD}\\]${running}\&\\[${X_TI_RESET}\\]
-    declare -i stopped=$(jobs -s | wc -l)
-    ((stopped == 0)) || jbs=${jbs:+${jbs}/}\\[${X_TI_YELLOW_F_BOLD}\\]${stopped}z\\[${X_TI_RESET}\\]
+        ## Build $jbs
+        builtin typeset jbs
+        builtin typeset -i detached="$(
+                command screen -ls 2>/dev/null \
+                | command grep -c '[Dd]etach[^)]*)$'
+        )"
+        detached+=$(
+                command tmux list-sessions 2>/dev/null \
+                | command fgrep -cv 'attached'
+        )
+        (( detached )) && {
+                jbs=\\[${X_TI_YELLOW_F}\\]${detached}d\\[${X_TI_RESET}\\]
+        }
+        builtin typeset -i running="$(
+                builtin jobs -r \
+                | command wc -l
+        )"
+        (( running )) && {
+                jbs=${jbs:+${jbs}/}\\[${X_TI_YELLOW_F_BOLD}\\]${running}\&\\[${X_TI_RESET}\\]
+        }
+        builtin typeset -i stopped="$(
+                builtin jobs -s \
+                | command wc -l
+        )"
+        (( stopped )) && {
+                jbs=${jbs:+${jbs}/}\\[${X_TI_YELLOW_F_BOLD}\\]${stopped}z\\[${X_TI_RESET}\\]
+        }
 
-    ## Build $user
-    declare user=
-    if ((EUID == 0))
-    then
-        user=\\[${X_TI_YELLOW_F_BOLD}\\]\\u\\[${X_TI_RESET}\\]
-    else
-        if [[ $USER == $LOGNAME ]]
+        ## Build $user
+        builtin typeset user
+        if
+                (( ! EUID ))
         then
-            user=\\u
+                user=\\[${X_TI_YELLOW_F_BOLD}\\]\\u\\[${X_TI_RESET}\\]
         else
-            user=\\[${X_TI_BOLD}\\]\\u\\[${X_TI_RESET}\\]
+                if
+                        [[ $USER == $LOGNAME ]]
+                then
+                        user=\\u
+                else
+                        user=\\[${X_TI_BOLD}\\]\\u\\[${X_TI_RESET}\\]
+                fi
         fi
-    fi
 
-    ## Build $hst
-    declare hst=
-    if [[ -r /etc/debian_chroot ]]
-    then
-        hst=$(< /etc/debian_chroot)
-    else
-        hst=
-    fi
-    if [[ $DISPLAY ]]
-    then
-        hst=\\[${X_TI_GREEN_F}\\]${hst}@\\[${X_TI_RESET}\\]
-    else
-        hst=\\[${X_TI_YELLOW_F}\\]${hst}@\\[${X_TI_RESET}\\]
-    fi
-    declare color_host_hash=
-    #declare host_cksum= color_host_hash=
-    #read -r host_cksum _ < <(cksum <<<"$HOSTNAME")
-    #declare color_host_hash=\\[$(tput setaf $((3 + host_cksum % 6 )))\\]
-    if [[ ! $SSH_CLIENT && ! $SSH_CONNECTION && ! $SSH_TTY ]]
-    then
-        hst=${hst}${color_host_hash}\\h\\[${X_TI_RESET}\\]
-    else
-        declare sess_src=$(who am i | sed -n 's/.*(\(.*\))/\1/p')
-        declare sess_parent=$(ps -o comm= -p "$PPID" 2>/dev/null)
-        if [[ -z $sess_src || $sess_src == \:* ]]
+        ## Build $hst
+        builtin typeset hst
+        if
+                [[ -r /etc/debian_chroot ]]
         then
-            hst=${hst}${color_host_hash}\\h\\[${X_TI_RESET}\\]
-        elif [[ $sess_parent == su || $sess_parent == sudo ]]
-        then
-            hst=${hst}\\[${X_TI_YELLOW_B}}\\]\\h\\[${X_TI_RESET}\\]
+                hst=$(</etc/debian_chroot)
         else
-            hst=${hst}\\[${X_TI_BLACK_F}${X_TI_RED_B}\\]\\h\\[${X_TI_RESET}\\]
+                hst=
         fi
-    fi
-
-    ## Build $perm
-    declare perm=
-    if [[ -w $PWD ]]
-    then
-        perm=\\[${X_TI_GREEN_F}\\]:\\[${X_TI_RESET}\\]
-    else
-        perm=\\[${X_TI_RED_F_BOLD}\\]:\\[${X_TI_RESET}\\]
-    fi
-
-    ## Build $shlvl
-    declare shlvl=${SHLVL}l
-
-    ## Build $git_ps1
-    declare -F __git_ps1 >/dev/null && {
-        declare git_ps1=$(GIT_PS1_SHOWDIRTYSTATE=yes ; GIT_PS1_SHOWSTASHSTATE=yes ; GIT_PS1_SHOWUPSTREAM=auto ; GIT_PIBE_STYLE=branch ; GIT_PS1_SHOWCOLORHINTS= __git_ps1 "%s")
-        if [[ $git_ps1 == *\** ]]
+        if
+                [[ -n $DISPLAY ]]
         then
-            git_ps1=\(\\[${X_TI_RED_F}\\]${git_ps1}\\[${X_TI_RESET}\\]\)
+                hst=\\[${X_TI_GREEN_F}\\]${hst}@\\[${X_TI_RESET}\\]
         else
-            git_ps1=${git_ps1:+\(${git_ps1}\)}
+                hst=\\[${X_TI_YELLOW_F}\\]${hst}@\\[${X_TI_RESET}\\]
         fi
-        if [[ -d ${PWD}/.git ]]
+        builtin typeset color_host_hash
+        #declare host_cksum= color_host_hash=
+        #read -r host_cksum _ < <(cksum <<<"$HOSTNAME")
+        #declare color_host_hash=\\[$(tput setaf $((3 + host_cksum % 6 )))\\]
+        if
+                [[
+                        -z $SSH_CLIENT &&
+                        -z $SSH_CONNECTION &&
+                        -z $SSH_TTY
+                ]]
         then
-            git_ps1=${git_ps1:+± ${git_ps1}}
+                hst=${hst}${color_host_hash}\\h\\[${X_TI_RESET}\\]
         else
-            git_ps1=${git_ps1:+(±) ${git_ps1}}
+                builtin typeset sess_src="$(
+                        command who am i \
+                        | command sed -n 's/.*(\(.*\))/\1/p'
+                )"
+                builtin typeset sess_parent="$(
+                        command ps -o comm= -p "$PPID" 2>/dev/null
+                )"
+                if
+                        [[ -z $sess_src || $sess_src == \:* ]]
+                then
+                        hst=${hst}${color_host_hash}\\h\\[${X_TI_RESET}\\]
+                elif
+                        [[ $sess_parent == su || $sess_parent == sudo ]]
+                then
+                        hst=${hst}\\[${X_TI_YELLOW_B}}\\]\\h\\[${X_TI_RESET}\\]
+                else
+                        hst=${hst}\\[${X_TI_BLACK_F}${X_TI_RED_B}\\]\\h\\[${X_TI_RESET}\\]
+                fi
         fi
-    }
 
-    declare -g PS1="${X_BLP_PS1_PREFIX:+${bracket_open}${X_BLP_PS1_PREFIX}${bracket_close}}${bracket_open}$-${bracket_close}${bracket_open}${shlvl}${jbs}${bracket_close}${bracket_open}${user}${hst}${perm}\\w${bracket_close}${err_string:+ ${err_string}}${git_ps1:+ ${git_ps1}} % "
-    declare -g PS2="> "
+        ## Build $perm
+        builtin typeset perm
+        if
+                [[ -w $PWD ]]
+        then
+                perm=\\[${X_TI_GREEN_F}\\]:\\[${X_TI_RESET}\\]
+        else
+                perm=\\[${X_TI_RED_F_BOLD}\\]:\\[${X_TI_RESET}\\]
+        fi
+
+        ## Build $shlvl
+        builtin typeset shlvl=${SHLVL}l
+
+        ## Build $git_ps1
+        builtin typeset -F __git_ps1 >/dev/null && {
+                builtin typeset git_ps1="$(
+                        GIT_PS1_SHOWDIRTYSTATE=yes;
+                        GIT_PS1_SHOWSTASHSTATE=yes;
+                        GIT_PS1_SHOWUPSTREAM=auto;
+                        GIT_PIBE_STYLE=branch;
+                        GIT_PS1_SHOWCOLORHINTS=;
+                        __git_ps1 "%s"
+                )"
+                if
+                        [[ $git_ps1 == *\** ]]
+                then
+                        git_ps1=\(\\[${X_TI_RED_F}\\]${git_ps1}\\[${X_TI_RESET}\\]\)
+                else
+                        git_ps1=${git_ps1:+\(${git_ps1}\)}
+                fi
+                if
+                        [[ -d ${PWD}/.git ]]
+                then
+                        git_ps1=${git_ps1:+± ${git_ps1}}
+                else
+                        git_ps1=${git_ps1:+(±) ${git_ps1}}
+                fi
+        }
+
+        builtin typeset -g +i PS1="${X_BLP_PS1_PREFIX:+${bracket_open}${X_BLP_PS1_PREFIX}${bracket_close}}${bracket_open}$-${bracket_close}${bracket_open}${shlvl}${jbs}${bracket_close}${bracket_open}${user}${hst}${perm}\\w${bracket_close}${err_string:+ ${err_string}}${git_ps1:+ ${git_ps1}} % "
+        builtin typeset -g +i PS2="> "
 }
 
 __blp_prompt ()
 case ${1//[0-9]/} in
-    off)
-        declare -g X_BLP_PS1_OLD=$PS1
+off)
+        builtin typeset -g +i X_BLP_PS1_OLD="$PS1"
         PS1="% "
-        ;;
-    tag)
-        if [[ $2 ]]
+;;
+tag)
+        if
+                [[ -n $2 ]]
         then
-            declare -g X_BLP_PS1_PREFIX=${@:2}
+                builtin typeset -g +i X_BLP_PS1_PREFIX="${@:2}"
         else
-            unset -v X_BLP_PS1_PREFIX
+                builtin unset -v X_BLP_PS1_PREFIX
         fi
-        ;;
-    on)
-        unset -v X_BLP_PS1_OLD
+;;
+on)
+        builtin unset -v X_BLP_PS1_OLD
         __blp_main "$1"
-        ;;
-    toggle)
-        if [[ $X_BLP_PS1_OLD ]]
+;;
+toggle)
+        if
+                [[ -n $X_BLP_PS1_OLD ]]
         then
-            __blp_prompt on
+                __blp_prompt on
         else
-            __blp_prompt off
+                __blp_prompt off
         fi
-        ;;
-    "")
-        [[ $X_BLP_PS1_OLD ]] || __blp_main "$1"
+;;
+"")
+        [[ -n $X_BLP_PS1_OLD ]] || __blp_main "$1"
 esac
 
 alias prompt=__blp_prompt
