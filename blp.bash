@@ -67,7 +67,7 @@ __blp_main ()
         ### running
         builtin typeset -a running
         builtin mapfile -t running < <(
-                builtin jobs -r
+                builtin jobs -pr
         )
 
         (( ${#running[@]} )) && {
@@ -77,7 +77,7 @@ __blp_main ()
         ### stopped
         builtin typeset -a stopped
         builtin mapfile -t stopped < <(
-                builtin jobs -s
+                builtin jobs -ps
         )
 
         (( ${#stopped[@]} )) && {
