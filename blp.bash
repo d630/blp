@@ -136,7 +136,7 @@ __blp_main ()
                 hst=${hst}${color_host_hash}\\h\\[${BLP_TI_RESET}\\]
         else
                 builtin typeset sess_src="$(
-                        command who am i \
+                        command whoami \
                         | command sed -n 's/.*(\(.*\))/\1/p'
                 )"
                 builtin typeset sess_parent="$(
